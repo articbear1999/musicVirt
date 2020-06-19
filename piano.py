@@ -77,7 +77,7 @@ def getClosest(val1, val2, val1Index, val2Index, target):
 
 infile = "twinkle.wav"
 rate, data = wave.read(infile)
-scale = 1                                                       # scale of 10 means 10 samples per sec
+scale = 2                                                       # scale of 10 means 10 samples per sec
 sample_rate = int(rate/scale)
 time_frames = [data[i:i + sample_rate] for i in range(0, len(data), sample_rate)]
 notes = []
@@ -100,12 +100,13 @@ for x in range(len(time_frames)):                               # for each secti
 
         plt.show()
         '''
+        #We need to figure out what to do with 0:1000 cause notes can go above
         index_max = np.argmax(np.abs(frequencies[0:1000//scale]))      # get the index of the max number within music range
 
         #filters out the amplitudes that are lower than this value found through testing 
         # should eventually understand the scale of the fft frequenices         
-        if(abs(frequencies[index_max]) < 5500000):
-                continue
+        if(abs(frequencies[index_max]) < 1000000/scale):
+               continue
         index_max = index_max*scale
         notes.append(freq_to_note(index_max))
         print(index_max)
