@@ -101,6 +101,11 @@ for x in range(len(time_frames)):                               # for each secti
         plt.show()
         '''
         index_max = np.argmax(np.abs(frequencies[0:1000//scale]))      # get the index of the max number within music range
+
+        #filters out the amplitudes that are lower than this value found through testing 
+        # should eventually understand the scale of the fft frequenices         
+        if(abs(frequencies[index_max]) < 5500000):
+                continue
         index_max = index_max*scale
         notes.append(freq_to_note(index_max))
         print(index_max)
