@@ -17,9 +17,7 @@ blackKeyList = ["A#", "", "C#", "D#", "", "F#", "G#"]
 
 
 def freq_to_note(freq):
-        noteNum = findClosest(freqList, 88, freq)      # return index of given freq on what numNote to play
-        return noteNum
-        #return noteList[noteNum % 12]                  # return that num in terms of the key that it corresponds to
+        return findClosest(freqList, 88, freq)      # return index of given freq on what numNote to play
 
 # findClosest, getClosest pulled straight from geeksforgeeks, minor tweaks to return index instead of value
 def findClosest(arr, n, target):                        # returns the index of the closest given value in an array
@@ -77,7 +75,7 @@ def getClosest(val1, val2, val1Index, val2Index, target):
 
 infile = "twinkle.wav"
 rate, data = wave.read(infile)
-scale = 2                                                       # scale of 10 means 10 samples per sec
+scale = 1                                                       # scale of 10 means 10 samples per sec
 sample_rate = int(rate/scale)
 time_frames = [data[i:i + sample_rate] for i in range(0, len(data), sample_rate)]
 notes = []
@@ -109,9 +107,8 @@ for x in range(len(time_frames)):                               # for each secti
                continue
         index_max = index_max*scale
         notes.append(freq_to_note(index_max))
-        print(index_max)
 
-print(notes)
+#print(notes)
 
 
 def playNote(note):                                     # takes a note name and the octave to determine wav file to play
@@ -125,7 +122,7 @@ piano = tk.Tk()
 frame = tk.Frame(piano)
 frame.pack()
 
-blackKeys = tk.Frame(piano)
+blackKeys = tk.Frame(piano)                             # black keys are in top frame
 blackKeys.pack(side=tk.TOP)
 
 piano.title('PIANO')
@@ -133,7 +130,7 @@ blackKeyButtons = []
 for i in range (0, 51):
         note = blackKeyList[i % 7]
         octave = str(i // 7) if (i % 7 == 0) else str(i // 7 + 1)
-        noteParam = note + octave                       # get the note name and the octave to pass into playNote
+        noteParam = note + octave                       # concatenate the two strings to get note and octave ie. C#7
         if (i % 7) == 1 or (i % 7) == 4:                # notes that don't exist draw blanks
                 buttonBlank = tk.Button(blackKeys, state=tk.DISABLED, padx=8, height=6, width=1, pady=8, bd=0,
                                         bg="white",fg="white", activebackground="red")
@@ -145,40 +142,44 @@ for i in range (0, 51):
                 buttonBlack.pack(side=tk.LEFT)
                 blackKeyButtons.append(buttonBlack)
 
-whiteKeys = tk.Frame(piano)
+whiteKeys = tk.Frame(piano)                             # push white key frame into the next top frame possible
 whiteKeys.pack(side=tk.TOP)
 whiteKeyButtons = []
-for i in range (0, 52):                                  # code white keys, text you get from the whitKeyList
+for i in range (0, 52):                                 # code white keys, text you get from the whitKeyList
         note = whiteKeyList[i % 7]
         octave = str(i//7) if (i % 7 == 0 or i % 7 == 1) else str(i//7+1)
-        noteParam = note + octave
+        noteParam = note + octave                       # concatenate the two strings to get note and octave ie. C7
         buttonWhite = tk.Button(whiteKeys, padx=4, height=6, width=1, pady=8, bd=4,
                                 text=note, fg="black",
                                 activebackground="red", command=lambda noteParam=noteParam: playNote(noteParam))
         buttonWhite.pack(side=tk.LEFT)
         whiteKeyButtons.append(buttonWhite)
 
-buttonConversion = [0, 0, 1, 2, 1, 3, 2, 4, 5, 3, 6, 4]
-COUNTER = 0
-def triggerButton():
+buttonConversion = [0, 0, 1, 2, 1, 3, 2, 4, 5, 3, 6, 4]  # black keys are in indices 1,4,6,9,11, whites keys in others
+COUNTER = 0                                     # global counter
+
+
+def triggerButton():                            # this will be called to play the song inputted
         global COUNTER
-        if COUNTER == len(notes):
+        if COUNTER == len(notes):               #if played whole song, stop playing
                 piano.after_cancel(play)
                 return
         num = notes[COUNTER]
         COUNTER = COUNTER + 1
         octave = num // 12
         num = num % 12
-        if num == 1 or num == 4 or num == 6 or num == 9 or num == 11:
+        if num == 1 or num == 4 or num == 6 or num == 9 or num == 11:   # if black key, call the corresponding black key
                 index = octave * 5 + buttonConversion[num]
                 blackKeyButtons[index].invoke()
-        else:
+                blackKeyButtons[index].flash()
+        else:                                                           # if white key, call the corresponding white key
                 index = octave * 7 + buttonConversion[num]
                 whiteKeyButtons[index].invoke()
-        piano.after(1000//scale, triggerButton)
+                whiteKeyButtons[index].flash()
+        piano.after(1000//scale, triggerButton)                         # call after again until the song is over
 
 
-play = piano.after(1000//scale, triggerButton)
+play = piano.after(1000//scale, triggerButton)          # do action while main loop is going for GUI
 piano.mainloop()
 
 '''
