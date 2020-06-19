@@ -18,7 +18,8 @@ blackKeyList = ["A#", "", "C#", "D#", "", "F#", "G#"]
 
 def freq_to_note(freq):
         noteNum = findClosest(freqList, 88, freq)      # return index of given freq on what numNote to play
-        return noteList[noteNum % 12]                  # return that num in terms of the key that it corresponds to
+        return noteNum
+        #return noteList[noteNum % 12]                  # return that num in terms of the key that it corresponds to
 
 # findClosest, getClosest pulled straight from geeksforgeeks, minor tweaks to return index instead of value
 def findClosest(arr, n, target):                        # returns the index of the closest given value in an array
@@ -113,8 +114,8 @@ def playNote(note):                                     # takes a note name and 
         sound.play()
         return
 
-piano = tk.Tk()
 
+piano = tk.Tk()
 frame = tk.Frame(piano)
 frame.pack()
 
@@ -122,6 +123,7 @@ blackKeys = tk.Frame(piano)
 blackKeys.pack(side=tk.TOP)
 
 piano.title('PIANO')
+blackKeyButtons = []
 for i in range (0, 51):
         note = blackKeyList[i % 7]
         octave = str(i // 7) if (i % 7 == 0) else str(i // 7 + 1)
@@ -135,10 +137,11 @@ for i in range (0, 51):
                                         text=blackKeyList[i % 7], bg="black", fg="white",
                                         activebackground="red", command=lambda noteParam=noteParam: playNote(noteParam))
                 buttonBlack.pack(side=tk.LEFT)
+                blackKeyButtons.append(buttonBlack)
 
 whiteKeys = tk.Frame(piano)
 whiteKeys.pack(side=tk.TOP)
-g = 0
+whiteKeyButtons = []
 for i in range (0, 52):                                  # code white keys, text you get from the whitKeyList
         note = whiteKeyList[i % 7]
         octave = str(i//7) if (i % 7 == 0 or i % 7 == 1) else str(i//7+1)
@@ -147,6 +150,29 @@ for i in range (0, 52):                                  # code white keys, text
                                 text=note, fg="black",
                                 activebackground="red", command=lambda noteParam=noteParam: playNote(noteParam))
         buttonWhite.pack(side=tk.LEFT)
+        whiteKeyButtons.append(buttonWhite)
+
+buttonConversion = [0, 0, 1, 2, 1, 3, 2, 4, 5, 3, 6, 4]
+COUNTER = 0
+def triggerButton():
+        global COUNTER
+        if COUNTER == len(notes):
+                piano.after_cancel(play)
+                return
+        num = notes[COUNTER]
+        COUNTER = COUNTER + 1
+        octave = num // 12
+        num = num % 12
+        if num == 1 or num == 4 or num == 6 or num == 9 or num == 11:
+                index = octave * 5 + buttonConversion[num]
+                blackKeyButtons[index].invoke()
+        else:
+                index = octave * 7 + buttonConversion[num]
+                whiteKeyButtons[index].invoke()
+        piano.after(1000//scale, triggerButton)
+
+
+play = piano.after(1000//scale, triggerButton)
 piano.mainloop()
 
 '''
