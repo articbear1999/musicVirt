@@ -76,21 +76,40 @@ def getClosest(val1, val2, val1Index, val2Index, target):
 
 infile = "twinkle.wav"
 rate, data = wave.read(infile)
-sample_rate = int(rate)
+scale = 1                                                       # scale of 10 means 10 samples per sec
+sample_rate = int(rate/scale)
 time_frames = [data[i:i + sample_rate] for i in range(0, len(data), sample_rate)]
 notes = []
 for x in range(len(time_frames)):                               # for each section, get the FFT
         data = np.array(time_frames[x])                         # convert to np array
         frequencies = np.fft.fft(data)                          # get the FFT of the wav file
         inverse = ifft(np.real(frequencies))
-        index_max = np.argmax(np.abs(frequencies[0:1000]))      # get the index of the max number within music range
+        '''
+        plt.subplot(2, 1, 1)
+        plt.plot(data)
+        plt.title("Original wave: " + infile)
+
+        plt.subplot(2, 1, 2)
+        plt.plot(np.abs(frequencies))
+        plt.title("Fourier transform results")
+
+        # plt.xlim(0, 10000)
+
+        plt.tight_layout()
+
+        plt.show()
+        '''
+        index_max = np.argmax(np.abs(frequencies[0:1000//scale]))      # get the index of the max number within music range
+        index_max = index_max*scale
         notes.append(freq_to_note(index_max))
+        print(index_max)
 
 print(notes)
 
 
-def playNote(note):
-        sound = pygame.mixer.Sound(note + ".mp3")
+def playNote(note):                                     # takes a note name and the octave to determine wav file to play
+        note = "piano_sounds" + '\\'+ note + ".wav"
+        sound = pygame.mixer.Sound(note)
         sound.play()
         return
 
@@ -104,21 +123,29 @@ blackKeys.pack(side=tk.TOP)
 
 piano.title('PIANO')
 for i in range (0, 51):
+        note = blackKeyList[i % 7]
+        octave = str(i // 7) if (i % 7 == 0) else str(i // 7 + 1)
+        noteParam = note + octave                       # get the note name and the octave to pass into playNote
         if (i % 7) == 1 or (i % 7) == 4:                # notes that don't exist draw blanks
                 buttonBlank = tk.Button(blackKeys, state=tk.DISABLED, padx=8, height=6, width=1, pady=8, bd=0,
                                         bg="white",fg="white", activebackground="red")
                 buttonBlank.pack(side=tk.LEFT)
         else:                                           # pentatonic notes, text you get from blackKeyList
                 buttonBlack = tk.Button(blackKeys, padx=4, height=6, width=1, pady=8, bd=4,
-                                        text=blackKeyList[i % 7], bg="black", fg="white",activebackground="red")
+                                        text=blackKeyList[i % 7], bg="black", fg="white",
+                                        activebackground="red", command=lambda noteParam=noteParam: playNote(noteParam))
                 buttonBlack.pack(side=tk.LEFT)
 
 whiteKeys = tk.Frame(piano)
 whiteKeys.pack(side=tk.TOP)
 g = 0
 for i in range (0, 52):                                  # code white keys, text you get from the whitKeyList
+        note = whiteKeyList[i % 7]
+        octave = str(i//7) if (i % 7 == 0 or i % 7 == 1) else str(i//7+1)
+        noteParam = note + octave
         buttonWhite = tk.Button(whiteKeys, padx=4, height=6, width=1, pady=8, bd=4,
-                                text=whiteKeyList[i % 7], fg="black", activebackground="red")
+                                text=note, fg="black",
+                                activebackground="red", command=lambda noteParam=noteParam: playNote(noteParam))
         buttonWhite.pack(side=tk.LEFT)
 piano.mainloop()
 
