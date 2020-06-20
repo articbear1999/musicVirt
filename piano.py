@@ -73,15 +73,17 @@ def getClosest(val1, val2, val1Index, val2Index, target):
                 return val1Index
 
 
-infile = "twinkle.wav"
+infile = "silent.wav"
 rate, data = wave.read(infile)
-scale = 1                                                       # scale of 10 means 10 samples per sec
+scale = 10                                                      # scale of 10 means 10 samples per sec
 sample_rate = int(rate/scale)
 time_frames = [data[i:i + sample_rate] for i in range(0, len(data), sample_rate)]
 notes = []
 for x in range(len(time_frames)):                               # for each section, get the FFT
         data = np.array(time_frames[x])                         # convert to np array
-        frequencies = np.fft.fft(data)                          # get the FFT of the wav file
+        dataZero = [row[0] for row in data]
+        #print(dataZero)
+        frequencies = np.fft.fft(dataZero)                          # get the FFT of the wav file
         inverse = ifft(np.real(frequencies))
         '''
         plt.subplot(2, 1, 1)
@@ -99,21 +101,21 @@ for x in range(len(time_frames)):                               # for each secti
         plt.show()
         '''
         #We need to figure out what to do with 0:1000 cause notes can go above
-        index_max = np.argmax(np.abs(frequencies[0:1000//scale]))      # get the index of the max number within music range
-
-        #filters out the amplitudes that are lower than this value found through testing 
-        # should eventually understand the scale of the fft frequenices         
-        if(abs(frequencies[index_max]) < 1000000/scale):
+        index_max = np.argmax(np.abs(frequencies[0:2000//scale]))      # get the index of the max number within music range
+        #filters out the amplitudes that are lower than this value found through testing
+        # should eventually understand the scale of the fft frequenices
+        #print(abs(frequencies[index_max]))
+        if(abs(frequencies[index_max]) < 4000000/scale):
                continue
         index_max = index_max*scale
         notes.append(freq_to_note(index_max))
 
-#print(notes)
+print(notes)
 
 
-def playNote(note):                                     # takes a note name and the octave to determine wav file to play
-        note = "piano_sounds" + '\\'+ note + ".wav"
-        sound = pygame.mixer.Sound(note)
+def playNote(note_played):                                     # takes a note name and the octave to determine wav file to play
+        note_played = "piano_sounds" + '\\'+ note_played + ".wav"
+        sound = pygame.mixer.Sound(note_played)
         sound.play()
         return
 
@@ -155,7 +157,7 @@ for i in range (0, 52):                                 # code white keys, text 
         buttonWhite.pack(side=tk.LEFT)
         whiteKeyButtons.append(buttonWhite)
 
-buttonConversion = [0, 0, 1, 2, 1, 3, 2, 4, 5, 3, 6, 4]  # black keys are in indices 1,4,6,9,11, whites keys in others
+buttonConversion = [0, 0, 1, 2, 2, 3, 3, 4, 5, 5, 6, 6]  # black keys are in indices 1,4,6,9,11, whites keys in others
 COUNTER = 0                                     # global counter
 
 
@@ -168,18 +170,22 @@ def triggerButton():                            # this will be called to play th
         COUNTER = COUNTER + 1
         octave = num // 12
         num = num % 12
+        index = buttonConversion[num]
         if num == 1 or num == 4 or num == 6 or num == 9 or num == 11:   # if black key, call the corresponding black key
-                index = octave * 5 + buttonConversion[num]
-                blackKeyButtons[index].invoke()
-                blackKeyButtons[index].flash()
+                octave = octave - 1 if (index == 0) else octave
+                note = blackKeyList[index]
+                playNote(note+str(octave))
+                #blackKeyButtons[index].flash()
         else:                                                           # if white key, call the corresponding white key
-                index = octave * 7 + buttonConversion[num]
-                whiteKeyButtons[index].invoke()
-                whiteKeyButtons[index].flash()
+                octave = octave - 1 if (index == 0 or index == 1) else octave
+                note = whiteKeyList[index]
+                playNote(note+str(octave))
+                #whiteKeyButtons[index].flash()
         piano.after(1000//scale, triggerButton)                         # call after again until the song is over
 
 
-play = piano.after(1000//scale, triggerButton)          # do action while main loop is going for GUI
+
+play = piano.after(0, triggerButton)          # do action while main loop is going for GUI
 piano.mainloop()
 
 '''
