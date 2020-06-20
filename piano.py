@@ -105,7 +105,7 @@ for x in range(len(time_frames)):                               # for each secti
         #filters out the amplitudes that are lower than this value found through testing
         # should eventually understand the scale of the fft frequenices
         #print(abs(frequencies[index_max]))
-        if(abs(frequencies[index_max]) < 1000000/scale):
+        if(abs(frequencies[index_max]) < 4000000/scale):
                continue
         index_max = index_max*scale
         notes.append(freq_to_note(index_max))
