@@ -1,8 +1,7 @@
 #'''
 import pygame
 import sys
-import tkinter as tk
-import matplotlib.pyplot as plt
+from  sheetmusic import  *
 from reader import read_data
 
 whiteKeyList = ["A", "B", "C", "D", "E", "F", "G"]
@@ -16,7 +15,7 @@ def main():
         global piano
         pygame.init()
         
-        notes = read_data(scale)
+       # notes = read_data(scale)
         print(notes)
         piano = tk.Tk()
         piano.title('PIANO')
@@ -25,7 +24,7 @@ def main():
         
         frame = tk.Frame(piano)
         frame.pack()
-        
+        noteTimingDropDown(frame)
         play = piano.after(0, triggerButton)          # do action while main loop is going for GUI
         piano.mainloop()
 
@@ -77,7 +76,7 @@ def triggerButton():                            # this will be called to play th
                 return
         num = notes[COUNTER]
         COUNTER = COUNTER + 1
-        octave = num // 12
+        octave = num // 12 + 1
         num = num % 12
         
         buttonConversion = [0, 0, 1, 2, 2, 3, 3, 4, 5, 5, 6, 6]  # black keys are in indices 1,4,6,9,11, whites keys in others
