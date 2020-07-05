@@ -1,5 +1,4 @@
 #'''
-import pygame
 import sys
 from  sheetmusic import  *
 from reader import read_data
@@ -24,9 +23,12 @@ def main():
         
         frame = tk.Frame(piano)
         frame.pack()
-        noteTimingDropDown(frame)
-        play = piano.after(0, triggerButton)          # do action while main loop is going for GUI
+        noteTimingDropDown(frame,notes)
+        #print(notes)
+        #play = piano.after(0, triggerButton)          # do action while main loop is going for GUI
         piano.mainloop()
+        #print(notes)
+
 
 def piano_construct():
         blackKeys = tk.Frame(piano)                             # black keys are in top frame
@@ -59,12 +61,6 @@ def piano_construct():
                                         activebackground="red", command=lambda noteParam=noteParam: playNote(noteParam))
                 buttonWhite.pack(side=tk.LEFT)
                 whiteKeyButtons.append(buttonWhite)
-
-def playNote(note_played):                                     # takes a note name and the octave to determine wav file to play
-        note_played = "piano_sounds" + '\\'+ note_played + ".wav"
-        sound = pygame.mixer.Sound(note_played)
-        sound.play()
-        return
 
 
 COUNTER = 0
