@@ -4,7 +4,7 @@ import pygame
 from time import sleep
 
 # transform the selection into a note that's recognizable, transform selection of A Sharp 4 to A#4
-def addNote(flatSharpNotClicked, notesClicked, octaveClicked, notesList):
+def addNote(flatSharpNotClicked, notesClicked, octaveClicked, timingClicked, notesList):
 	octave = octaveClicked.get()
 	notesSel = notesClicked.get()
 	flatSharpNot = flatSharpNotClicked.get()
@@ -33,7 +33,15 @@ def addNote(flatSharpNotClicked, notesClicked, octaveClicked, notesList):
 			print("There's no E# or B# on this piano")
 			return
 		flatSharpNot = "#"
-	notesList.append(notesSel + flatSharpNot + octave)
+	if timingClicked.get() == "1/8":
+		timing = .125
+	elif timingClicked.get() == "1/4":
+		timing = .25
+	elif timingClicked.get() == "1/2":
+		timing = .5
+	elif timingClicked.get() == "1":
+		timing = 1
+	notesList.append([notesSel + flatSharpNot + octave, timing])
 	print(notesList)
 
 
@@ -55,10 +63,10 @@ def playNote(note_played):                                     # takes a note na
 # play the whole list of notes
 def playNoteList(note_list):
 	for i in note_list:
-		note_played = "piano_sounds" + '\\' + i + ".wav"
+		note_played = "piano_sounds" + '\\' + i[0] + ".wav"
 		sound = pygame.mixer.Sound(note_played)
 		sound.play()
-		pygame.time.delay(500)
+		pygame.time.delay(int(2000* i[1]))
 	return
 
 
@@ -105,7 +113,7 @@ def noteTimingDropDown(frame, notesList):
 	timingDrop.pack()
 
 	addButton = Button(frame, text = "add note", command =
-				lambda: addNote(flatSharpNotClicked, notesClicked, octaveClicked, notesList))
+				lambda: addNote(flatSharpNotClicked, notesClicked, octaveClicked, timingClicked, notesList))
 	addButton.pack()
 
 	deleteButton = Button(frame, text = "delete note", command = lambda: delNote(notesList))
