@@ -6,6 +6,7 @@ from reader import read_data
 whiteKeyList = ["A", "B", "C", "D", "E", "F", "G"]
 blackKeyList = ["A#", "", "C#", "D#", "", "F#", "G#"]
 notes = []
+sheetNotes = []
 piano = None
 scale = 10                                                      # scale of 10 means 10 samples per sec
 
@@ -23,7 +24,10 @@ def main():
         
         frame = tk.Frame(piano)
         frame.pack()
-        noteTimingDropDown(frame,notes)
+        canvas = Canvas(frame, width=1200, height=120, bg="white")
+        canvas.pack()
+        drawSheet(canvas)
+        noteTimingDropDown(frame, notes, canvas)
         #print(notes)
         #play = piano.after(0, triggerButton)          # do action while main loop is going for GUI
         piano.mainloop()
